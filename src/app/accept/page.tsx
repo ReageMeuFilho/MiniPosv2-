@@ -374,7 +374,7 @@ export default function AcceptPayment() {
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-500">
           Payments processed on{' '}
-          <span className="font-semibold">Base Sepolia</span> (Chain ID: {CHAIN_ID})
+          <span className="font-semibold">Arbitrum Sepolia</span> (Chain ID: {CHAIN_ID})
         </p>
       </div>
     </div>

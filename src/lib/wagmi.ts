@@ -1,10 +1,10 @@
 import { http, createConfig } from 'wagmi';
-import { baseSepolia } from 'wagmi/chains';
+import { arbitrumSepolia } from 'wagmi/chains';
 import { coinbaseWallet, metaMask, walletConnect } from 'wagmi/connectors';
 
-// Wagmi configuration for Base Sepolia
+// Wagmi configuration for Arbitrum Sepolia
 export const config = createConfig({
-  chains: [baseSepolia],
+  chains: [arbitrumSepolia],
   connectors: [
     metaMask(),
     coinbaseWallet({
@@ -22,7 +22,7 @@ export const config = createConfig({
     }),
   ],
   transports: {
-    [baseSepolia.id]: http(),
+    [arbitrumSepolia.id]: http(),
   },
 });
 

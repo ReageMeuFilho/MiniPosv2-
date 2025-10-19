@@ -1,11 +1,11 @@
 import { Address } from 'viem';
 
 // Network Configuration
-export const CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532');
-export const BLOCK_EXPLORER = process.env.NEXT_PUBLIC_BLOCK_EXPLORER || 'https://sepolia.basescan.org';
+export const CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '421614');
+export const BLOCK_EXPLORER = process.env.NEXT_PUBLIC_BLOCK_EXPLORER || 'https://sepolia.arbiscan.io';
 
 // Contract Addresses
-export const USDC_ADDRESS = (process.env.NEXT_PUBLIC_USDC_ADDRESS || '0x036CbD53842c5426634e7929541eC2318f3dCF7e') as Address;
+export const USDC_ADDRESS = (process.env.NEXT_PUBLIC_USDC_ADDRESS || '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d') as Address;
 export const MERCHANT_ADDRESS = (process.env.NEXT_PUBLIC_MERCHANT_ADDRESS || '') as Address;
 export const RESERVE_ADDRESS = (process.env.NEXT_PUBLIC_RESERVE_ADDRESS || '') as Address;
 
