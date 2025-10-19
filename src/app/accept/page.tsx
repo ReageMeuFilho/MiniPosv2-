@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
 import { QRCodeSVG } from 'qrcode.react';
 import { buildEip681Erc20, parseUsdcAmount, isValidUsdAmount } from '@/lib/eip681';
 import { generateOrderId, copyToClipboard, getExplorerAddressUrl } from '@/lib/utils';
 import {
   USDC_ADDRESS,
-  MERCHANT_ADDRESS,
   CHAIN_ID,
   BLOCK_EXPLORER,
 } from '@/lib/constants';
 
 export default function AcceptPayment() {
+  const { address: merchantAddress, isConnected } = useAccount();
   const [amount, setAmount] = useState('');
   const [orderId, setOrderId] = useState('');
   const [paymentUri, setPaymentUri] = useState('');
@@ -24,18 +25,21 @@ export default function AcceptPayment() {
     setOrderId(generateOrderId());
   }, []);
 
-  // Update payment URI when amount changes
+  // Update payment URI when amount or connected wallet changes
   useEffect(() => {
-    if (amount && isValidUsdAmount(amount)) {
+    if (amount && isValidUsdAmount(amount) && merchantAddress) {
       const amountInUnits = parseUsdcAmount(amount);
       const uri = buildEip681Erc20(
         amountInUnits,
         CHAIN_ID,
         USDC_ADDRESS,
-        MERCHANT_ADDRESS
+        merchantAddress
       );
       setPaymentUri(uri);
       setError('');
+    } else if (amount && !merchantAddress) {
+      setError('Please connect your wallet first');
+      setPaymentUri('');
     } else if (amount) {
       setError('Please enter a valid amount');
       setPaymentUri('');
@@ -43,7 +47,7 @@ export default function AcceptPayment() {
       setPaymentUri('');
       setError('');
     }
-  }, [amount]);
+  }, [amount, merchantAddress]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -84,9 +88,78 @@ export default function AcceptPayment() {
   };
 
   const isValidAmount = amount && isValidUsdAmount(amount);
-  const explorerUrl = MERCHANT_ADDRESS
-    ? getExplorerAddressUrl(MERCHANT_ADDRESS, BLOCK_EXPLORER)
+  const explorerUrl = merchantAddress
+    ? getExplorerAddressUrl(merchantAddress, BLOCK_EXPLORER)
     : '';
+
+  // Not connected state
+  if (!isConnected) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Accept Payment</h1>
+          <p className="text-gray-600">
+            Connect your wallet to start accepting payments
+          </p>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4">
+              <svg
+                className="w-10 h-10 text-yellow-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Connect Your Wallet
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Your connected wallet will receive customer payments
+            </p>
+            <p className="text-sm text-gray-500">
+              Click "Connect Wallet" in the header to get started
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <svg
+              className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-blue-900 mb-1">
+                Farcaster Mini App Mode
+              </p>
+              <p className="text-sm text-blue-700">
+                Each user's connected wallet becomes their merchant address. Payments go directly to your wallet - no intermediaries.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -259,7 +332,7 @@ export default function AcceptPayment() {
       </div>
 
       {/* Merchant Info */}
-      {MERCHANT_ADDRESS && (
+      {merchantAddress && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start">
             <svg
@@ -277,10 +350,10 @@ export default function AcceptPayment() {
             </svg>
             <div className="flex-1">
               <p className="text-sm font-medium text-blue-900 mb-1">
-                Receiving Address
+                Your Receiving Address (Connected Wallet)
               </p>
               <p className="text-xs font-mono text-blue-700 break-all mb-2">
-                {MERCHANT_ADDRESS}
+                {merchantAddress}
               </p>
               {explorerUrl && (
                 <a
